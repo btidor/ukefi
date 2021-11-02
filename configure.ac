@@ -1,0 +1,4 @@
+AC_INIT([ukefi], [0.1])
+AM_INIT_AUTOMAKE
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
