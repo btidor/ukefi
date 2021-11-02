@@ -1,0 +1,128 @@
+#!/bin/bash
+
+set -euf -o pipefail
+
+etc="@sysconfdir@/ukefi"
+efi="/boot/efi/EFI"
+installdir="$efi/$(<$etc/directory)"
+
+osrelease="/usr/lib/os-release"
+cmdline="$etc/cmdline"
+efistub="/usr/lib/systemd/boot/efi/linuxx64.efi.stub"
+
+certificate="$etc/certificate.pem"
+cardserial="$etc/pkcs11-serial"
+cardpin="$etc/pkcs11-pin"
+
+setup() {
+    if [ "$EUID" -ne 0 ]; then
+        echo "ERROR: $0 must be run as the root user" >/dev/stderr
+        exit 1
+    fi
+    if [ ! -d "$efi" ]; then
+        echo "ERROR: expected EFI boot volume to be mounted at /boot/efi" >/dev/stderr
+        echo "  and contain an 'EFI' directory" >/dev/stderr
+        exit 2
+    fi
+    mkdir -p "$installdir"
+
+    if [ ! -f "$certificate" ] || [ ! -f "$cardpin" ] || [ ! -f "$cardserial" ]; then
+        echo "ERROR: please set up a security key/smartcard before using" >/dev/stderr
+        echo "  the UKEFI tool" >/dev/stderr
+        exit 3
+    fi
+    local perms
+    perms=$(stat -c '%a:%u' "$cardpin")
+    if [ "$perms" != "600:0" ]; then
+        echo "ERROR: $cardpin should have access mode 0600" >/dev/stderr
+        echo "  and be owned by root for security." >/dev/stderr
+        exit 3
+    fi
+}
+
+requires-rebuild() {
+    local target="$1"
+    shift
+    # If target file does not exist, this is the inital build.
+    [ ! -f "$target" ] && return 0
+    local targettime
+    targettime=$(stat -c '%Y' "$target")
+    for dep in "$@"; do
+        # If dependency does not exist, raise an error.
+        if [ ! -f "$dep" ]; then
+            echo "ERROR: could not find $dep" >/dev/stderr
+            exit 2
+        fi
+        local deptime
+        deptime=$(stat -c '%Y' "$dep")
+        # If dependency was modified after the target was last build, rebuild
+        # the target.
+        [ "$deptime" -gt "$targettime" ] && return 0
+    done
+    # Otherwise, a build/rebuild is not necessary.
+    return 1
+}
+
+install() {
+    local tmpfile
+    tmpfile="$(mktemp)"
+
+    objcopy \
+        --add-section .osrel="$osrelease" --change-section-vma .osrel=0x20000    \
+        --add-section .cmdline="$cmdline" --change-section-vma .cmdline=0x30000  \
+        --add-section .linux="$1"         --change-section-vma .linux=0x2000000  \
+        --add-section .initrd="$2"        --change-section-vma .initrd=0x3000000 \
+        "$efistub" "$tmpfile"
+    sign "$tmpfile"
+    mv "$tmpfile" "$3"
+}
+
+sign() {
+    local serial
+    serial=$(cat /etc/ukefi/pkcs11-serial)
+    echo -n "Insert security key/smartcard..."
+    until p11-kit list-modules | \
+            grep --silent "serial-number: $serial"; do
+        sleep 2
+        echo -n "."
+    done
+    echo "found"
+
+    echo "Touch security key/smartcard to sign..."
+    until sbsign \
+            --engine pkcs11 \
+            --key "pkcs11:serial=$(<$cardserial)?pin-source=$cardpin" \
+            --cert "$certificate" \
+            --output "$tmpfile" \
+            "$tmpfile" 2>/dev/null; do
+        # Retry, with a delay to avoid churn in case the command fails
+        # noninteractively.
+        sleep 2
+        echo "Signing operation failed! Please try again."
+    done
+}
+
+main() {
+    setup
+
+    local linux="/boot/vmlinuz"
+    local initrd="/boot/initrd.img"
+    local ukefi="$installdir/linux.efi"
+    if requires-rebuild "$ukefi" \
+            "$osrelease" "$cmdline" "$efistub" \
+            "$certificate" "$cardpin" "$cardserial" \
+            "$linux" "$initrd" ; then
+        install "$linux" "$initrd" "$ukefi"
+    fi
+
+    linux="$linux.old"
+    initrd="$initrd.old"
+    ukefi="$installdir/linux-old.efi"
+    if requires-rebuild "$ukefi" "$linux" "$initrd"; then
+        # To avoid breaking the backup boot entry, we only rebulid it when the
+        # backup kernel or initrd change.
+        install "$linux" "$initrd" "$ukefi"
+    fi
+}
+
+main

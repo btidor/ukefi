@@ -2,3 +2,4 @@ autom4te.cache/
 build/
 config.*
 Makefile
+src/update-ukefi

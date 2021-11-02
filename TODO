@@ -1,0 +1,6 @@
+Package installation
+* populate /etc/cmdline with current /proc/cmdline
+* link update-ukefi into /etc/initramfs/post-update.d/ (creating if necessary)
+* efibootmgr postinit/prerm script
+* clean up EFI directory on uninstall
+* support local cert + key (?)
