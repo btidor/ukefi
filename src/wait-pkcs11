@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -euf -o pipefail
+
+SERIAL=$(cat /etc/ukefi/pkcs11-serial)
+
+echo -n "\nInsert smartcard $SERIAL..."
+until /usr/bin/p11-kit list-modules | \
+        grep "serial-number: $SERIAL" >/dev/null; do
+    sleep 2
+    echo -n "."
+done
+echo "found"
+
+echo "Touch Yubikey to sign..."

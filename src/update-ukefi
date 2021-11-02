@@ -1,0 +1,46 @@
+#!/usr/bin/make -f
+
+etc = /etc/ukefi
+efi = /boot/efi/EFI/$(shell cat $(etc)/subdir)
+
+osrelease = /usr/lib/os-release
+efistub = /usr/lib/systemd/boot/efi/linuxx64.efi.stub
+
+all: $(efi)/linux.efi $(efi)/linux-old.efi
+
+$(efi)/linux.efi: $(osrelease) $(etc)/cmdline /boot/vmlinuz /boot/initrd.img \
+    $(efistub) $(etc)/pkcs11-serial $(etc)/certificate.pem
+	$(eval tmpfile := $(shell mktemp))
+	objcopy \
+	  --add-section .osrel="$(osrelease)" --change-section-vma .osrel=0x20000 \
+	  --add-section .cmdline="$(etc)/cmdline" --change-section-vma .cmdline=0x30000 \
+	  --add-section .linux="/boot/vmlinuz" --change-section-vma .linux=0x2000000 \
+	  --add-section .initrd="/boot/initrd.img" --change-section-vma .initrd=0x3000000 \
+	  "$(efistub)" "$(tmpfile)" # TODO: enforce PIN is root-only
+	./wait-pkcs11 # TODO: retry sbsign operation eg if incorrect PIN (also faster to detect smartcard)
+	sbsign \
+	  --engine pkcs11 \
+	  --key "pkcs11:serial=$(shell cat $(etc)/pkcs11-serial)?pin-source=$(etc)/pkcs11-pin" \
+	  --cert "$(etc)/certificate.pem" \
+	  --output "$(tmpfile)" \
+	  "$(tmpfile)"
+	mkdir -p $(efi)
+	mv "$(tmpfile)" $@
+
+$(efi)/linux-old.efi: /boot/vmlinuz.old /boot/initrd.img.old
+	$(eval tmpfile := $(shell mktemp))
+	objcopy \
+	  --add-section .osrel="$(osrelease)" --change-section-vma .osrel=0x20000 \
+	  --add-section .cmdline="$(etc)/cmdline" --change-section-vma .cmdline=0x30000 \
+	  --add-section .linux="/boot/vmlinuz" --change-section-vma .linux=0x2000000 \
+	  --add-section .initrd="/boot/initrd.img" --change-section-vma .initrd=0x3000000 \
+	  "$(efistub)" "$(tmpfile)"
+	./wait-pkcs11
+	sbsign \
+	  --engine pkcs11 \
+	  --key "pkcs11:serial=$(shell cat $(etc)/pkcs11-serial)?pin-source=$(etc)/pkcs11-pin" \
+	  --cert "$(etc)/certificate.pem" \
+	  --output "$(tmpfile)" \
+	  "$(tmpfile)"
+	mkdir -p $(efi)
+	mv "$(tmpfile)" $@
