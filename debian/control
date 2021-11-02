@@ -1,0 +1,18 @@
+Source: ukefi
+Section: admin
+Priority: optional
+Maintainer: Benjamin Tidor <benjamin@tidor.net>
+Build-Depends: debhelper-compat (= 12)
+Standards-Version: 4.4.1
+Homepage: https://github.com/btidor/ukefi
+Vcs-Browser: https://github.com/btidor/ukefi
+Vcs-Git: https://github.com/btidor/ukefi.git
+
+Package: ukefi
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+# TODO: add depends, description
+Description: lorem ipusum dolor sit amet
+ Contrary to popular belief, Lorem Ipsum is not simply random text. It has
+ roots in a piece of classical Latin literature from 45 BC, making it over 2000
+ years old.
