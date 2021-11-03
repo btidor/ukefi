@@ -4,8 +4,8 @@ set -euf -o pipefail
 
 case "$1" in
     remove)
-        echo "For safety, leaving boot entries and EFIs in place."
-        echo "Use 'ukefi-configure-boot remove' to uninstall."
+        echo "!! For safety, leaving boot entries and EFIs in place."
+        echo "!! Use 'ukefi-configure-boot remove' to uninstall."
     ;;
 
     upgrade|deconfigure|failed-upgrade)

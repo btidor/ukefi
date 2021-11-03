@@ -30,7 +30,7 @@ setup() {
         echo "WARNING: generating unsigned unified kernel image" >/dev/stderr
     else
         local perms
-        perms=$(stat -c '%a:%u' "$cardpin")
+        perms=$(stat -c '%a:%u' -L "$cardpin")
         if [ "$perms" != "600:0" ]; then
             echo "ERROR: $cardpin should have access mode 0600" >/dev/stderr
             echo "  and be owned by root for security." >/dev/stderr
@@ -41,22 +41,28 @@ setup() {
 
 requires-rebuild() {
     local target="$1"
+    local optional=""
     shift
     # If target file does not exist, this is the inital build.
     [ ! -f "$target" ] && return 0
     local targettime
-    targettime=$(stat -c '%Y' "$target")
+    targettime=$(stat -c '%Y' -L "$target")
     for dep in "$@"; do
-        # If dependency does not exist, raise an error.
-        if [ ! -f "$dep" ]; then
-            echo "ERROR: could not find $dep" >/dev/stderr
-            exit 2
+        if [ "$dep" = "--optional" ]; then
+            optional="yes"
+        elif [ ! -f "$dep" ]; then
+            # If dependency does not exist, raise an error.
+            if [ -z "$optional" ]; then
+                echo "ERROR: could not find $dep" >/dev/stderr
+                exit 2
+            fi
+        else
+            local deptime
+            deptime=$(stat -c '%Y' -L "$dep")
+            # If dependency was modified after the target was last build, rebuild
+            # the target.
+            [ "$deptime" -gt "$targettime" ] && return 0
         fi
-        local deptime
-        deptime=$(stat -c '%Y' "$dep")
-        # If dependency was modified after the target was last build, rebuild
-        # the target.
-        [ "$deptime" -gt "$targettime" ] && return 0
     done
     # Otherwise, a build/rebuild is not necessary.
     return 1
@@ -77,7 +83,9 @@ install() {
 }
 
 maybe-sign() {
-    [ ! -f "$certificate" ] || [ ! -f "$cardserial" ] || [ ! -f "$cardpin" ] && return
+    if [ ! -f "$certificate" ] || [ ! -f "$cardserial" ] || [ ! -f "$cardpin" ]; then
+        return
+    fi
 
     local serial
     serial=$(cat /etc/ukefi/pkcs11-serial)
@@ -111,8 +119,8 @@ main() {
     local ukefi="$installdir/linux.efi"
     if requires-rebuild "$ukefi" \
             "$osrelease" "$cmdline" "$efistub" \
-            "$certificate" "$cardpin" "$cardserial" \
-            "$linux" "$initrd" ; then
+            "$linux" "$initrd" \
+            "--optional" "$certificate" "$cardpin" "$cardserial"; then
         install "$linux" "$initrd" "$ukefi"
     fi
 

@@ -4,10 +4,14 @@ set -euf -o pipefail
 
 case "$1" in
     configure)
-        ukefi-configure-boot install
+        mkdir -p /etc/ukefi
+        if [ ! -f /etc/ukefi/directory ]; then
+            echo "Ubuntu" > /etc/ukefi/directory
+        fi
         if [ ! -f /etc/ukefi/cmdline ]; then
             cat /proc/cmdline > /etc/ukefi/cmdline
         fi
+        ukefi-configure-boot install
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

@@ -18,11 +18,11 @@ extract-bootnum() {
             | grep "\/File(\\\\EFI\\\\$directory\\\\$1)" \
             | awk '{print $1;}'
     )"
-    if [[ $word != "Boot*" ]]; then
+    if [[ "$word" != Boot* ]]; then
         echo "ERROR: could not extract boot number" 2>/dev/stderr
         exit 1
     fi
-    bootnum=$(echo "$word" | grep -oE '[0-9]+')
+    bootnum=$(echo "$word" | sed 's/^Boot//' | tr -d '*' )
 }
 
 install-entry() {
@@ -34,8 +34,8 @@ install-entry() {
         local bootdisk
         bootdisk="$(mount | grep ' on /boot/efi ' | awk '{print $1;}')"
         efibootmgr --create --disk "$bootdisk" \
-            --label "$directory" \
-            --loader "$efipath"
+            --label "$directory$2" \
+            --loader "$efipath" >/dev/null
     fi
 }
 
@@ -44,7 +44,7 @@ remove-entry() {
     if entry-exists "$1"; then
         echo "Removing boot entry for $efipath"
         extract-bootnum "$1"
-        efibootmgr --delete-bootnum --bootnum "$bootnum"
+        efibootmgr --delete-bootnum --bootnum "$bootnum" >/dev/null
 
         echo "Removing unified kernel image at $efipath"
         rm "/boot/efi/EFI/$directory/$1" || true
@@ -74,12 +74,12 @@ esac
 
 case "$1" in
     install)
-        install-entry "linux.efi"
-        install-entry "linux-old.efi"
+        install-entry "linux-old.efi" " (Previous Kernel)"
+        install-entry "linux.efi" ""
     ;;
     remove)
-        remove-entry "linux.efi"
         remove-entry "linux-old.efi"
+        remove-entry "linux.efi"
         rm -d "/boot/efi/EFI/$directory" || true
     ;;
     *)
