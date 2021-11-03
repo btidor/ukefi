@@ -7,4 +7,5 @@ install-sh
 Makefile
 Makefile.in
 missing
+src/ukefi-configure-boot
 src/update-ukefi

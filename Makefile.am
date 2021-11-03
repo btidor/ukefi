@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 
-bin_SCRIPTS = src/update-ukefi
+bin_SCRIPTS = src/update-ukefi src/ukefi-configure-boot
 CLEANFILES = $(bin_SCRIPTS)
 
 etcdir = $(sysconfdir)/ukefi
@@ -12,9 +12,9 @@ etc_DATA = data/directory
 do_subst = $(SED) -e 's,[@]datadir[@],$(datadir),g' \
                -e 's,[@]sysconfdir[@],$(sysconfdir),g'
 
-src/update-ukefi: src/update-ukefi.in
-	$(do_subst) < src/update-ukefi.in > src/update-ukefi
-	chmod +x src/update-ukefi
+src/%: src/%.in
+	$(do_subst) < $< > $@
+	chmod +x $@
 
 install-exec-hook:
 	mkdir -p $(sysconfdir)/initramfs/post-update.d

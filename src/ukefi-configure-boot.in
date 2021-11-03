@@ -1,0 +1,89 @@
+#!/bin/bash
+
+set -euf -o pipefail
+
+entry-exists() {
+    if efibootmgr --verbose | grep "\/File(\\\\EFI\\\\$directory\\\\$1)"
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
+extract-bootnum() {
+    local word
+    word="$(
+        efibootmgr --verbose \
+            | grep "\/File(\\\\EFI\\\\$directory\\\\$1)" \
+            | awk '{print $1;}'
+    )"
+    if [[ $word != "Boot*" ]]; then
+        echo "ERROR: could not extract boot number" 2>/dev/stderr
+        exit 1
+    fi
+    bootnum=$(echo "$word" | grep -oE '[0-9]+')
+}
+
+install-entry() {
+    local efipath="\\EFI\\$directory\\$1"
+    if entry-exists "$1"; then
+        echo "Found existing boot entry for $efipath; skipping"
+    else
+        echo "Installing boot entry for $efipath"
+        local bootdisk
+        bootdisk="$(mount | grep ' on /boot/efi ' | awk '{print $1;}')"
+        efibootmgr --create --disk "$bootdisk" \
+            --label "$directory" \
+            --loader "$efipath"
+    fi
+}
+
+remove-entry() {
+    local efipath="\\EFI\\$directory\\$1"
+    if entry-exists "$1"; then
+        echo "Removing boot entry for $efipath"
+        extract-bootnum "$1"
+        efibootmgr --delete-bootnum --bootnum "$bootnum"
+
+        echo "Removing unified kernel image at $efipath"
+        rm "/boot/efi/EFI/$directory/$1" || true
+    else
+        echo "Boot entry for $efipath not found; skipping"
+    fi
+}
+
+usage() {
+    echo "usage: $0 {install | remove} [--directory DIRECTORY]"
+    exit 1
+}
+
+case "$#" in
+    1)
+        etc="@sysconfdir@/ukefi"
+        directory="$(<$etc/directory)"
+    ;;
+    3)
+        [ "$2" != "--directory" ] && usage
+        directory="$3"
+    ;;
+    *)
+        usage
+    ;;
+esac
+
+case "$1" in
+    install)
+        install-entry "linux.efi"
+        install-entry "linux-old.efi"
+    ;;
+    remove)
+        remove-entry "linux.efi"
+        remove-entry "linux-old.efi"
+    ;;
+    *)
+        usage
+    ;;
+esac
+
+exit 0
