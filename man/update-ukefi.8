@@ -1,0 +1,28 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" (C) Copyright 2021 Benjamin Tidor <benjamin@tidor.net>
+.\"
+
+.TH UPDATE-UKEFI 8 "2021-11-02" "ukefi"
+.\" Please adjust this date whenever revising the manpage.
+
+.SH NAME
+update\-ukefi \- generate and install a unified kernel image
+
+.SH SYNOPSIS
+.B update\-ukefi
+
+.SH DESCRIPTION
+The
+.B update\-ukefi
+command generates, signs and installs a unified kernel image, using as input
+the kernel and initramfs image in /boot. The image is in the EFI format and
+can be directly booted on a UEFI-based machine without the need for a
+traditional bootloader.
+.PP
+To support Secure Boot,
+.B update\-ukefi
+can be configured to sign the generated image using a security key or other
+PKCS#11 smartcard.
+
+.SH SEE ALSO
+.BR update-initramfs (8).
