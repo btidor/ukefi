@@ -1,0 +1,17 @@
+Setup:
+ * aclocal
+ * autoconf
+ * automake --add-missing
+
+Build:
+ * ./configure
+ * make
+ * [sudo] make install
+
+Release:
+ * (update version in configure.ac:1)
+ * git commit -am "release vX.Y"
+ * gbp dch
+ * git commit -a --amend
+ * git tag vX.Y
+ * gbp buildpackage
