@@ -26,7 +26,7 @@ setup() {
     fi
     mkdir -p "$installdir"
 
-    if [ ! -f "$certificate" ] || [ ! -f "$cardpin" ] || [ ! -f "$cardserial" ]; then
+    if [ -z "$(<$certificate)" ] || [ -z "$(<$cardserial)" ]; then
         echo "ERROR: please set up a security key/smartcard before using" >/dev/stderr
         echo "  the UKEFI tool" >/dev/stderr
         exit 3
