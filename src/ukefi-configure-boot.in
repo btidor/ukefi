@@ -80,6 +80,7 @@ case "$1" in
     remove)
         remove-entry "linux.efi"
         remove-entry "linux-old.efi"
+        rm -d "/boot/efi/EFI/$directory" || true
     ;;
     *)
         usage
