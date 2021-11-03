@@ -4,11 +4,10 @@ bin_SCRIPTS = src/update-ukefi
 CLEANFILES = $(bin_SCRIPTS)
 
 etcdir = $(sysconfdir)/ukefi
-etc_DATA = data/directory data/pkcs11-pin data/pkcs11-serial
+etc_DATA = data/directory
 
 # The distribution is responsible for populating /etc/cmdline with the current
-# kernel command-line paramters, and /etc/certificate.pem and /etc/key.pem with
-# a generated keypair.
+# kernel command-line paramters.
 
 do_subst = $(SED) -e 's,[@]datadir[@],$(datadir),g' \
                -e 's,[@]sysconfdir[@],$(sysconfdir),g'

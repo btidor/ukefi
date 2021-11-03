@@ -26,17 +26,16 @@ setup() {
     fi
     mkdir -p "$installdir"
 
-    if [ -z "$(<$certificate)" ] || [ -z "$(<$cardserial)" ]; then
-        echo "ERROR: please set up a security key/smartcard before using" >/dev/stderr
-        echo "  the UKEFI tool" >/dev/stderr
-        exit 3
-    fi
-    local perms
-    perms=$(stat -c '%a:%u' "$cardpin")
-    if [ "$perms" != "600:0" ]; then
-        echo "ERROR: $cardpin should have access mode 0600" >/dev/stderr
-        echo "  and be owned by root for security." >/dev/stderr
-        exit 3
+    if [ ! -f "$certificate" ] || [ ! -f "$cardserial" ] || [ ! -f "$cardpin" ]; then
+        echo "WARNING: generating unsigned unified kernel image" >/dev/stderr
+    else
+        local perms
+        perms=$(stat -c '%a:%u' "$cardpin")
+        if [ "$perms" != "600:0" ]; then
+            echo "ERROR: $cardpin should have access mode 0600" >/dev/stderr
+            echo "  and be owned by root for security." >/dev/stderr
+            exit 3
+        fi
     fi
 }
 
@@ -73,11 +72,13 @@ install() {
         --add-section .linux="$1"         --change-section-vma .linux=0x2000000  \
         --add-section .initrd="$2"        --change-section-vma .initrd=0x3000000 \
         "$efistub" "$tmpfile"
-    sign "$tmpfile"
+    maybe-sign "$tmpfile"
     mv "$tmpfile" "$3"
 }
 
-sign() {
+maybe-sign() {
+    [ ! -f "$certificate" ] || [ ! -f "$cardserial" ] || [ ! -f "$cardpin" ] && return
+
     local serial
     serial=$(cat /etc/ukefi/pkcs11-serial)
     echo -n "Insert security key/smartcard..."
