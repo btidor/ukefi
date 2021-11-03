@@ -10,11 +10,9 @@ Vcs-Git: https://github.com/btidor/ukefi.git
 
 Package: ukefi
 Architecture: all
-Depends: ${misc:Depends},
- binutils, initramfs-tools, sbsigntool, systemd,
- libengine-pkcs11-openssl, opensc, p11-kit,
- efibootmgr
-Suggests: yubikey-manager
+Depends: ${misc:Depends}, binutils, initramfs-tools, efibootmgr
+Suggests: sbsigntool, systemd, libengine-pkcs11-openssl, opensc, p11-kit,
+  yubikey-manager
 Description: unified kernel image generator for UEFI systems
  UKEFI allows users with a UEFI-based machine to boot directly into a unified
  kernel image instead of using a traditional bootloader. This package provides
