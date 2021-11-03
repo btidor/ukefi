@@ -1,5 +1,10 @@
 autom4te.cache/
 build/
+aclocal.m4
 config.*
+configure
+install-sh
 Makefile
+Makefile.in
+missing
 src/update-ukefi
