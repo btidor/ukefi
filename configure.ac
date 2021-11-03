@@ -1,4 +1,4 @@
-AC_INIT([ukefi], [0.1])
+AC_INIT([ukefi], [1.0])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/update-ukefi.in)
 AC_CONFIG_FILES([Makefile])

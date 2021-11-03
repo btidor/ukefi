@@ -15,5 +15,6 @@ src/%: src/%.in
 	chmod +x $@
 
 install-exec-hook:
-	mkdir -p $(sysconfdir)/initramfs/post-update.d
-	$(LN_S) $(bindir)/update-ukefi $(sysconfdir)/initramfs/post-update.d/90-update-ukefi
+	mkdir -p $(DESTDIR)$(sysconfdir)/initramfs/post-update.d
+	@( cd $(DESTDIR)$(sysconfdir)/initramfs/post-update.d; \
+	  $(LN_S) -f $(bindir)/update-ukefi 90-update-ukefi; )

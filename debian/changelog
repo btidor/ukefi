@@ -1,4 +1,4 @@
-ukefi (0.1-1) UNRELEASED; urgency=medium
+ukefi (1.0-1) impish; urgency=medium
 
   * initial script
   * basic autotools setup
@@ -6,5 +6,16 @@ ukefi (0.1-1) UNRELEASED; urgency=medium
   * github template
   * rewrite script in bash
   * update debian metadata
+  * remove autoconf generated files
+  * more /etc files, portability
+  * write manpage
+  * support unsigned mode
+  * postinst + prerm hooks
+  * adjust boot entry removal script
+  * add maintainer docs
+  * move /etc/ukefi/directory to packager responsibility
+  * bugfixes
+  * default to unsigned images
+  * release v1.0
 
- -- Benjamin Tidor <benjamin@tidor.net>  Wed, 03 Nov 2021 01:39:02 +0000
+ -- Benjamin Tidor <benjamin@tidor.net>  Wed, 03 Nov 2021 23:49:41 +0000
