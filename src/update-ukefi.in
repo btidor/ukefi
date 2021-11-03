@@ -20,7 +20,7 @@ setup() {
         exit 1
     fi
     if [ ! -d "$efi" ]; then
-        echo "ERROR: expected EFI boot volume to be mounted at /boot/efi" >/dev/stderr
+        echo "ERROR: EFI System Partition should be mounted at /boot/efi" >/dev/stderr
         echo "  and contain an 'EFI' directory" >/dev/stderr
         exit 2
     fi

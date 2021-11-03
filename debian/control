@@ -10,9 +10,15 @@ Vcs-Git: https://github.com/btidor/ukefi.git
 
 Package: ukefi
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
-# TODO: add depends, description
-Description: lorem ipusum dolor sit amet
- Contrary to popular belief, Lorem Ipsum is not simply random text. It has
- roots in a piece of classical Latin literature from 45 BC, making it over 2000
- years old.
+Depends: ${misc:Depends},
+ binutils, initramfs-tools, sbsigntool, systemd,
+ libengine-pkcs11-openssl, opensc, p11-kit
+Suggests: yubikey-manager
+Description: signed unified kernel image generator for UEFI systems
+ UKEFI allows users with a UEFI-based machine to boot directly into a unified
+ kernel image instead of using a traditional bootloader. This package provides
+ the update-ukefi tool, which builds a unified image containing the kernel and
+ initramfs, signs it with a user-provided key, and installs it to the EFI
+ system partition. This package adds hooks so that update-ukefi runs any time a
+ new initramfs is generated, and installs an EFI boot option pointing to the
+ unified kernel image.

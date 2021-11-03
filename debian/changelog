@@ -1,16 +1,10 @@
 ukefi (0.1-1) UNRELEASED; urgency=medium
 
-  * notes
-  * updates
-  * switch to slot 9a
-  * add efibootmgr instructions
-  * two-step-dev
-  * add two-step-dev2.diff
-  * WIP
-  * configure
-  * no-configure
-  * X
-  * xyz
-  * ig
+  * initial script
+  * basic autotools setup
+  * basic debian packaging template
+  * github template
+  * rewrite script in bash
+  * update debian metadata
 
- -- Benjamin Tidor <benjamin@tidor.net>  Mon, 01 Nov 2021 22:06:24 +0000
+ -- Benjamin Tidor <benjamin@tidor.net>  Wed, 03 Nov 2021 01:39:02 +0000

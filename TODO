@@ -4,3 +4,4 @@ Package installation
 * efibootmgr postinit/prerm script
 * clean up EFI directory on uninstall
 * support local cert + key (?)
+* manpage for update-ukefi

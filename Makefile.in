@@ -643,7 +643,7 @@ uninstall-am: uninstall-binSCRIPTS uninstall-etcDATA
 
 src/update-ukefi: src/update-ukefi.in
 	$(do_subst) < src/update-ukefi.in > src/update-ukefi
-	chmod +x update-ukefi
+	chmod +x src/update-ukefi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

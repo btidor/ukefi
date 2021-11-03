@@ -7,4 +7,4 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 RUN apt update && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt install -y -q build-essential autoconf shellcheck \
-        git-buildpackage
+        git-buildpackage debhelper-compat

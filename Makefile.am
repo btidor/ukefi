@@ -11,4 +11,4 @@ do_subst = sed -e 's,[@]datadir[@],$(datadir),g' \
 
 src/update-ukefi: src/update-ukefi.in
 	$(do_subst) < src/update-ukefi.in > src/update-ukefi
-	chmod +x update-ukefi
+	chmod +x src/update-ukefi
