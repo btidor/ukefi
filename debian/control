@@ -10,7 +10,7 @@ Vcs-Git: https://github.com/btidor/ukefi.git
 
 Package: ukefi
 Architecture: all
-Depends: ${misc:Depends}, binutils, initramfs-tools, efibootmgr
+Depends: ${misc:Depends}, binutils, initramfs-tools, efibootmgr, systemd-boot
 Suggests: sbsigntool, systemd, libengine-pkcs11-openssl, opensc, p11-kit,
   yubikey-manager
 Description: unified kernel image generator for UEFI systems
