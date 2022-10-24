@@ -1,3 +1,10 @@
+ukefi (1.1-1) kinetic; urgency=medium
+
+  * add new dependency for kinetic
+  * release v1.1
+
+ -- Benjamin Tidor <benjamin@tidor.net>  Mon, 24 Oct 2022 22:59:22 +0000
+
 ukefi (1.0-1) impish; urgency=medium
 
   * initial script

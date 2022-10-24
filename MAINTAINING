@@ -11,12 +11,13 @@ Build:
 Release:
  * (update version in configure.ac:1)
  * git commit -am "release vX.Y"
- * update version in debian/changelog
  * gbp dch
+ * update version in debian/changelog
  * git commit -a --amend
  * git tag vX.Y
  * gbp buildpackage
 
 Upload:
  * gbp buildpackage --git-builder='debuild -S'
+ * debsign build/ukefi_X.Y-Z_source.changes
  * dput ppa:btidor/ukefi build/ukefi_X.Y-Z_source.changes
